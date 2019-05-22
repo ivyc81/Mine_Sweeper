@@ -1,26 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
+import Board from './Board';
+import NewGameForm from './NewGameForm'
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component{
+  constructor(props){
+    super(props);
+    this.state={
+      height: 0,
+      width: 0,
+      gameId: 0,
+    }
+    this.makeBoard = this.makeBoard.bind(this);
+  }
+
+  makeBoard(x, y){
+    const gameId = Math.random();
+    this.setState({
+      height: x,
+      width: y,
+      gameId
+    })
+  }
+
+  render(){
+    const {height, width, gameId} = this.state;
+    return (
+      <div className="App">
+        <NewGameForm triggerMakeBoard={this.makeBoard}/>
+        <Board x={height} y={width} gameId={gameId}/>
+      </div>
+    );
+  }
 }
 
 export default App;
