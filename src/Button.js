@@ -9,7 +9,7 @@ const StyledButton = styled.div`
   width: 100%;
   height: 100%;
   background-color: ${({value}) => {
-    return value === '' ? 'grey' : 'white';
+    return value === ''  || value ==='!' ? 'grey' : 'white';
   }}
 `;
 
@@ -20,19 +20,21 @@ class Button extends PureComponent {
   }
 
   handleClick(evt) {
-    const {x, y, triggerCheckValue} = this.props;
-    const button = evt.button;
-    console.log(button)
+    const {x, y, value, triggerCheckValue, triggerFlag} = this.props;
+    console.log(evt.type)
 
-    if(button === 0){
+    if(evt.type === 'click' && value !== '!'){
       triggerCheckValue(x, y);
+    } else {
+      evt.preventDefault();
+      triggerFlag(x, y);
     }
   }
 
   render(){
     const {value} = this.props;
     return (
-      <StyledButton onClick={this.handleClick} value={value}>
+      <StyledButton onClick={this.handleClick} onContextMenu={this.handleClick} value={value}>
         {value === 0 ? '' : value}
       </StyledButton>
     )

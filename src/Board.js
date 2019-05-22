@@ -40,23 +40,32 @@ class Board extends Component {
       button: [],
       lost: false,
       win: false,
+      start: true,
     }
     this.checkValue = this.checkValue.bind(this);
+    this.flag = this.flag.bind(this);
   }
 
   componentDidUpdate(prevProps){
     const {x, y, gameId} = this.props;
     if(prevProps.gameId !== gameId){
-      const b = this.createBoard(x, y);
-      let button = Array.from({length: x}, () => Array.from({length: y}, () => ''));
-      this.setState({b, button, lost: false, win: false});
+      const b = Array.from({length: x}, () => Array.from({length: y}, () => 0));
+      const button = Array.from({length: x}, () => Array.from({length: y}, () => ''));
+      this.setState({b, button, lost: false, win: false, start: true});
     }
   }
 
   checkValue(x, y){
-    const {b, button, win} = this.state;
+    const {b, button, win, start} = this.state;
+    const boardWidth = b[0].length;
+    const boardLength = b.length;
     let newButton = [...button];
     let nowLost;
+
+    if(start){
+      const currNum = x * boardWidth + y;
+      this.createBoard(boardLength, boardWidth, currNum);
+    }
 
     if(!win){
       if(b[x][y] === 'mine'){
@@ -72,14 +81,22 @@ class Board extends Component {
       if(!nowLost){
         nowWin = this.checkWin(newButton, b);
       }
-      this.setState({button: newButton, lost: nowLost, win: nowWin});
+      this.setState({button: newButton, lost: nowLost, win: nowWin, start: false});
     }
+  }
+
+  flag(x, y){
+    const {button} = this.state;
+    const newButton = [...button];
+    newButton[x][y] = '!';
+
+    this.setState({buttln: newButton})
   }
 
   findBorder(x, y, newButton, board, seen = new Set()){
     for(let i = x - 1; i <= x + 1; i++){
       for(let j = y - 1; j <= y + 1; j++){
-        if(board[i] && board[i][j] >= 0){
+        if(board[i] && board[i][j] >= 0 && newButton[i][j] !== '!'){
           newButton[i][j] = board[i][j];
           if (board[i][j] === 0 && !seen.has(`${i}${j}`)){
           seen.add(`${i}${j}`);
@@ -116,31 +133,33 @@ class Board extends Component {
     return b;
   }
 
-  createBoard(m, n){
-    let b = Array.from({length: m}, () => Array.from({length: n}, () => 0));
-    const mines = drawRandom(0.1, m * n);
+  createBoard(length, width, startPoint){
+    const {b} = this.state;
+    let newBoard = [...b];
+    const mines = drawRandom(0.1, length * width, startPoint);
     for(let num of mines){
-      const x = Math.floor(num / n);
-      const y = num % n;
-      b[x][y] = 'mine';
-      b = this.checkSourrounding(b, x, y);
+      const x = Math.floor(num / width);
+      const y = num % width;
+      newBoard[x][y] = 'mine';
+      newBoard = this.checkSourrounding(newBoard, x, y);
     }
-    return b;
+    this.setState({b: newBoard});
   }
 
   renderBoard(){
     const {button} = this.state;
 
-    return button.map((row, irow) => {
-      return <tr key={irow}>
-        {row.map((cell, icell) => {
-          return <td key={icell}>
+    return button.map((row, rowIdx) => {
+      return <tr key={rowIdx}>
+        {row.map((cell, cellIdx) => {
+          return <td key={cellIdx}>
                   <Button
-                    key={`${irow}, ${icell}`}
-                    x={irow}
-                    y={icell}
+                    key={`${rowIdx}, ${cellIdx}`}
+                    x={rowIdx}
+                    y={cellIdx}
                     value={cell}
                     triggerCheckValue={this.checkValue}
+                    triggerFlag={this.flag}
                   />
                 </td>
         })}
@@ -150,14 +169,14 @@ class Board extends Component {
 
   render(){
     const {lost, win} = this.state;
-    const b = this.renderBoard();
+    const boardHTML = this.renderBoard();
     return (
       <StyledBoard>
         {lost && <StyledBanner>You Lost!</StyledBanner>}
         {win && <StyledBanner>Congrats!</StyledBanner>}
         <StyledTable>
           <tbody>
-            {b}
+            {boardHTML}
           </tbody>
         </StyledTable>
       </StyledBoard>
