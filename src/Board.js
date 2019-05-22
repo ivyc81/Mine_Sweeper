@@ -36,29 +36,29 @@ class Board extends Component {
   constructor(props){
     super(props);
     this.state={
-      b: [],
+      board: [],
       button: [],
       lost: false,
       win: false,
       start: true,
     }
     this.checkValue = this.checkValue.bind(this);
-    this.flag = this.flag.bind(this);
+    this.toggleFlag = this.toggleFlag.bind(this);
   }
 
   componentDidUpdate(prevProps){
-    const {x, y, gameId} = this.props;
+    const {height, width, gameId} = this.props;
     if(prevProps.gameId !== gameId){
-      const b = Array.from({length: x}, () => Array.from({length: y}, () => 0));
-      const button = Array.from({length: x}, () => Array.from({length: y}, () => ''));
-      this.setState({b, button, lost: false, win: false, start: true});
+      const board = Array.from({length: height}, () => Array.from({length: width}, () => 0));
+      const button = Array.from({length: height}, () => Array.from({length: width}, () => ''));
+      this.setState({board, button, lost: false, win: false, start: true});
     }
   }
 
   checkValue(x, y){
-    const {b, button, win, start} = this.state;
-    const boardWidth = b[0].length;
-    const boardLength = b.length;
+    const {board, button, win, start} = this.state;
+    const boardWidth = board[0].length;
+    const boardLength = board.length;
     let newButton = [...button];
     let nowLost;
 
@@ -68,24 +68,24 @@ class Board extends Component {
     }
 
     if(!win){
-      if(b[x][y] === 'mine'){
-        newButton = [...b];
+      if(board[x][y] === 'mine'){
+        newButton = [...board];
         nowLost = true;
-      } else if(b[x][y]){
-        newButton[x][y] = b[x][y];
+      } else if(board[x][y]){
+        newButton[x][y] = board[x][y];
       } else {
-        newButton = this.findBorder(x, y, newButton, b);
+        newButton = this.findBorder(x, y, newButton, board);
       }
 
       let nowWin;
       if(!nowLost){
-        nowWin = this.checkWin(newButton, b);
+        nowWin = this.checkWin(newButton, board);
       }
       this.setState({button: newButton, lost: nowLost, win: nowWin, start: false});
     }
   }
 
-  flag(x, y){
+  toggleFlag(x, y){
     const {button} = this.state;
     const newButton = [...button];
     newButton[x][y] = newButton[x][y] === '!' ? '' : '!';
@@ -121,29 +121,29 @@ class Board extends Component {
     return true;
   }
 
-  checkSourrounding(b, x, y){
+  serSourrounding(board, x, y){
     for(let i = x - 1; i <= x + 1; i++){
       for(let j = y - 1; j <= y + 1; j++){
-        if(b[i] && b[i][j] >= 0 && b[i][j] !== 'mine'){
-          b[i][j] ++;
+        if(board[i] && board[i][j] >= 0 && board[i][j] !== 'mine'){
+          board[i][j] ++;
         }
       }
     }
 
-    return b;
+    return board;
   }
 
   createBoard(length, width, startPoint){
-    const {b} = this.state;
-    let newBoard = [...b];
+    const {board} = this.state;
+    let newBoard = [...board];
     const mines = drawRandom(0.1, length * width, startPoint);
     for(let num of mines){
       const x = Math.floor(num / width);
       const y = num % width;
       newBoard[x][y] = 'mine';
-      newBoard = this.checkSourrounding(newBoard, x, y);
+      newBoard = this.serSourrounding(newBoard, x, y);
     }
-    this.setState({b: newBoard});
+    this.setState({board: newBoard});
   }
 
   renderBoard(){
@@ -159,7 +159,7 @@ class Board extends Component {
                     y={cellIdx}
                     value={cell}
                     triggerCheckValue={this.checkValue}
-                    triggerFlag={this.flag}
+                    triggerFlag={this.toggleFlag}
                   />
                 </td>
         })}

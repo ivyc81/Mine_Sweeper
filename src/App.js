@@ -28,7 +28,7 @@ class App extends Component{
     return (
       <div className="App">
         <NewGameForm triggerMakeBoard={this.makeBoard}/>
-        <Board x={height} y={width} gameId={gameId}/>
+        <Board height={height} width={width} gameId={gameId}/>
       </div>
     );
   }
