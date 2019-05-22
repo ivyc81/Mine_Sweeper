@@ -21,11 +21,10 @@ class Button extends PureComponent {
 
   handleClick(evt) {
     const {x, y, value, triggerCheckValue, triggerFlag} = this.props;
-    console.log(evt.type)
 
     if(evt.type === 'click' && value !== '!'){
       triggerCheckValue(x, y);
-    } else {
+    } else if(evt.type === 'contextmenu'){
       evt.preventDefault();
       triggerFlag(x, y);
     }

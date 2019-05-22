@@ -88,7 +88,7 @@ class Board extends Component {
   flag(x, y){
     const {button} = this.state;
     const newButton = [...button];
-    newButton[x][y] = '!';
+    newButton[x][y] = newButton[x][y] === '!' ? '' : '!';
 
     this.setState({buttln: newButton})
   }
